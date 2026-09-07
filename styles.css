@@ -189,6 +189,18 @@ main {
   box-shadow: var(--shadow-soft);
 }
 
+.tribute-text .in-lieu a {
+  color: var(--color-accent-dark);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+  text-underline-offset: 3px;
+}
+
+.tribute-text .in-lieu a:hover {
+  color: var(--color-accent);
+}
+
 .gallery-heading {
   font-family: "Playfair Display", Georgia, serif;
   font-size: 1.6rem;
@@ -339,7 +351,37 @@ main {
   color: var(--color-text-soft);
 }
 
+.comment-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 11px 22px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.comment-toggle:hover {
+  background: var(--color-accent-dark);
+}
+
+.comment-toggle-chevron {
+  display: inline-block;
+  transition: transform 0.25s ease;
+}
+
+.comment-toggle.open .comment-toggle-chevron {
+  transform: rotate(180deg);
+}
+
 .comment-form {
+  margin-top: 16px;
   background: var(--color-panel);
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -347,6 +389,12 @@ main {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  animation: dropDown 0.25s ease;
+}
+
+@keyframes dropDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .comment-form-row {

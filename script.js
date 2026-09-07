@@ -71,7 +71,7 @@
   const dots = dotsWrap.querySelectorAll(".dot");
   let current = 0;
   let timer = null;
-  const INTERVAL = 5000;
+  const INTERVAL = 9000;
 
   function goTo(index) {
     slides[current].classList.remove("active");
@@ -87,7 +87,7 @@
 
   function writingComment() {
     const form = document.getElementById("comment-form");
-    return form && (form.contains(document.activeElement) || form.elements.message.value.trim() !== "");
+    return form && !form.hidden;
   }
 
   function startAutoplay() {
@@ -116,6 +116,24 @@
   const nameEl = document.getElementById("comment-name");
   const messageEl = document.getElementById("comment-message");
   const submitEl = formEl.querySelector(".comment-submit");
+  const toggleEl = document.getElementById("comment-toggle");
+
+  function setFormOpen(open) {
+    formEl.hidden = !open;
+    toggleEl.setAttribute("aria-expanded", String(open));
+    toggleEl.classList.toggle("open", open);
+    if (open) {
+      stopAutoplay();
+      nameEl.focus();
+    } else {
+      startAutoplay();
+    }
+  }
+
+  toggleEl.addEventListener("click", () => {
+    setStatus("");
+    setFormOpen(formEl.hidden);
+  });
 
   let allComments = [];
   let commentsAvailable = false;
@@ -140,7 +158,7 @@
     if (mine.length === 0) {
       const li = document.createElement("li");
       li.className = "comment-empty";
-      li.textContent = "No memories shared for this photo yet — be the first.";
+      li.textContent = "If this photo brings back a memory, we'd love to hear it.";
       listEl.appendChild(li);
       return;
     }
@@ -166,7 +184,7 @@
     });
   }
 
-  async function loadComments() {
+  async function loadComments(initial) {
     try {
       const res = await fetch("/api/comments", { cache: "no-store" });
       if (!res.ok) throw new Error("status " + res.status);
@@ -177,10 +195,19 @@
       renderComments();
     } catch (err) {
       // No API here (opened as a local file, or not deployed yet) — keep the gallery clean.
-      commentsAvailable = false;
-      commentsEl.hidden = true;
+      // A failed background refresh just keeps what we already have.
+      if (initial) {
+        commentsAvailable = false;
+        commentsEl.hidden = true;
+      }
     }
   }
+
+  // Pick up memories other visitors post while this page is open.
+  const REFRESH_MS = 90 * 1000;
+  setInterval(() => {
+    if (commentsAvailable && formEl.hidden) loadComments(false);
+  }, REFRESH_MS);
 
   formEl.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -207,8 +234,9 @@
       if (!res.ok) throw new Error(data.error || "Could not post your memory.");
       if (data.comment) allComments.push(data.comment);
       messageEl.value = "";
-      setStatus("Thank you — your memory has been shared.", "success");
       renderComments();
+      setFormOpen(false);
+      setStatus("Thank you — your memory has been shared.", "success");
     } catch (err) {
       setStatus(err.message || "Could not post your memory.", "error");
     } finally {
@@ -216,10 +244,5 @@
     }
   });
 
-  // Pause the slideshow while someone is writing so the photo doesn't change under them.
-  [nameEl, messageEl].forEach((el) => {
-    el.addEventListener("focus", stopAutoplay);
-  });
-
-  loadComments();
+  loadComments(true);
 })();
