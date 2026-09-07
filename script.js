@@ -244,4 +244,103 @@
   });
 
   loadComments(true);
+
+  // ---------- Teri's song (YouTube player + header sound toggle) ----------
+  // Browsers block sound until the visitor taps something, so the page loads
+  // silent and the speaker icon starts the music. The visible player lives in
+  // the Tributes section; the icon drives it remotely.
+  const songHost = document.getElementById("song-player");
+  const soundBtn = document.getElementById("sound-toggle");
+  const videoId = songHost && songHost.dataset.videoId;
+
+  if (songHost && soundBtn && videoId) {
+    let player = null;
+    let playerReady = false;
+    let pendingPlay = false;
+
+    function soundIsOn() {
+      return playerReady && !player.isMuted() && player.getPlayerState() === YT.PlayerState.PLAYING;
+    }
+
+    function updateSoundIcon() {
+      const on = soundIsOn();
+      soundBtn.classList.toggle("on", on);
+      soundBtn.setAttribute("aria-pressed", String(on));
+      const label = on ? "Mute Teri's song" : "Play Teri's song";
+      soundBtn.setAttribute("aria-label", label);
+      soundBtn.title = label;
+    }
+
+    function startSound() {
+      player.unMute();
+      player.setVolume(65);
+      player.playVideo();
+      updateSoundIcon();
+    }
+
+    window.onYouTubeIframeAPIReady = function () {
+      player = new YT.Player("song-player", {
+        videoId,
+        playerVars: { playsinline: 1, rel: 0, loop: 1, playlist: videoId, modestbranding: 1 },
+        events: {
+          onReady() {
+            playerReady = true;
+            if (pendingPlay) { pendingPlay = false; startSound(); }
+            updateSoundIcon();
+          },
+          onStateChange() { updateSoundIcon(); },
+        },
+      });
+    };
+
+    const api = document.createElement("script");
+    api.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(api);
+
+    soundBtn.addEventListener("click", () => {
+      dismissPrompt();
+      if (!playerReady) { pendingPlay = true; return; }
+      if (soundIsOn()) {
+        player.mute();
+        updateSoundIcon();
+      } else {
+        startSound();
+      }
+    });
+
+    // An invitation to start the music, pointing at the speaker icon. It shows
+    // on every visit — people forget the song is there — but folds away on its
+    // own and can be dismissed with the ×.
+    const promptEl = document.getElementById("sound-prompt");
+    const promptPlay = document.getElementById("sound-prompt-play");
+    const promptClose = document.getElementById("sound-prompt-close");
+    let promptTimer = null;
+
+    function dismissPrompt() {
+      if (!promptEl || promptEl.hidden) return;
+      clearTimeout(promptTimer);
+      promptEl.classList.add("leaving");
+      setTimeout(() => {
+        promptEl.hidden = true;
+        promptEl.classList.remove("leaving");
+      }, 300);
+    }
+
+    if (promptEl) {
+      setTimeout(() => {
+        if (!soundIsOn()) {
+          promptEl.hidden = false;
+          promptTimer = setTimeout(dismissPrompt, 15000);
+        }
+      }, 1200);
+
+      promptPlay.addEventListener("click", () => {
+        dismissPrompt();
+        if (!playerReady) { pendingPlay = true; return; }
+        if (!soundIsOn()) startSound();
+      });
+
+      promptClose.addEventListener("click", dismissPrompt);
+    }
+  }
 })();

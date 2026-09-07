@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Playfair+Display:ital,wght@0,600;1,500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=3" />
+<link rel="stylesheet" href="styles.css?v=5" />
 </head>
 <body>
 
@@ -18,6 +18,24 @@
   <div class="header-text">
     <h1>Teresa Lynn Melton <span class="nickname">"Teri"</span></h1>
     <div class="dates">March 9, 1959 &ndash; September 5, 2026</div>
+  </div>
+  <button id="sound-toggle" class="sound-toggle" type="button" aria-pressed="false" aria-label="Play Teri's song" title="Play Teri's song">
+    <svg class="icon-sound-off" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/>
+      <path d="M16.5 9.5l5 5M21.5 9.5l-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+    </svg>
+    <svg class="icon-sound-on" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/>
+      <path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+    </svg>
+  </button>
+
+  <div id="sound-prompt" class="sound-prompt" role="dialog" aria-label="Play Teri's song" hidden>
+    <button id="sound-prompt-play" class="sound-prompt-body" type="button">
+      <span class="sound-prompt-title">Play Teri&rsquo;s song</span>
+      <span class="sound-prompt-sub">Johnny Cash &mdash; &ldquo;If We Never Meet Again&rdquo;</span>
+    </button>
+    <button id="sound-prompt-close" class="sound-prompt-close" type="button" aria-label="Dismiss">&times;</button>
   </div>
 </header>
 
@@ -35,6 +53,14 @@
       <p>In her later years, with proper treatment, Teresa overcame the challenges of schizophrenia and emerged happier and more optimistic than ever. She made friends easily and found real contentment in life.</p>
       <p>Teresa is survived by her son, Christopher; her sister, Patty; her brothers, Bill and Jim; and her mother, Etta.</p>
       <p class="in-lieu">In lieu of flowers, the family requests that donations be made to the <a href="https://curesz.org/donate/" target="_blank" rel="noopener">CURESZ Foundation</a>.</p>
+    </div>
+
+    <div class="song-card">
+      <h3 class="song-heading">Teri&rsquo;s song</h3>
+      <p class="song-caption">Johnny Cash &mdash; &ldquo;If We Never Meet Again&rdquo;</p>
+      <div class="song-player">
+        <div id="song-player" data-video-id="l78ysPt0gFw"></div>
+      </div>
     </div>
   </section>
 
@@ -75,6 +101,6 @@
 <footer>In loving memory of Teresa Lynn Melton, 1959 &ndash; 2026</footer>
 
 <script src="images/manifest.js"></script>
-<script src="script.js?v=3"></script>
+<script src="script.js?v=5"></script>
 </body>
 </html>
