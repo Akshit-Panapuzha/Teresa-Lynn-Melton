@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# Secrets / local env (GitHub token for the comments API lives in Vercel, never here)
+.env
+.env.*
+!.env.example
+
+# Vercel local config
+.vercel
+
+# Dependencies (if any get added)
+node_modules/
