@@ -317,7 +317,7 @@
     let promptTimer = null;
 
     function dismissPrompt() {
-      if (!promptEl || promptEl.hidden) return;
+      if (!promptEl || promptEl.hidden || promptEl.classList.contains("leaving")) return;
       clearTimeout(promptTimer);
       promptEl.classList.add("leaving");
       setTimeout(() => {
