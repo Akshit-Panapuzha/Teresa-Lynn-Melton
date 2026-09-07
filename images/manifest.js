@@ -21,5 +21,8 @@ const galleryImages = [
   "gallery-photos/20-page21.jpg",
   "gallery-photos/21-page22.jpg",
   "gallery-photos/22-page23.jpg",
+  "gallery-photos/23-recent-1.jpg",
+  "gallery-photos/24-recent-2.jpg",
+  "gallery-photos/25-recent-3.jpg",
   "Profile-Image-Teri-Melton.jpg"
 ];

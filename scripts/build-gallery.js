@@ -10,8 +10,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const imagesDir = path.join(__dirname, "..", "images");
 const manifestPath = path.join(imagesDir, "manifest.js");
 const validExt = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
-// Files used for page decoration rather than the slideshow.
-const isExcluded = (name) => /background/i.test(name);
+// Skip page decoration (backgrounds) and raw screenshots dropped in for cropping.
+const isExcluded = (name) => /background/i.test(name) || /^screenshot/i.test(name);
 
 if (!fs.existsSync(imagesDir)) {
   fs.mkdirSync(imagesDir, { recursive: true });

@@ -1,6 +1,9 @@
 # macOS
 .DS_Store
 
+# Raw screenshots dropped in for cropping — the cropped photos get committed, not these
+images/**/Screenshot*
+
 # Secrets / local env (GitHub token for the comments API lives in Vercel, never here)
 .env
 .env.*
