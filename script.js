@@ -1,4 +1,5 @@
 (function () {
+  // ---------- Tabs ----------
   const tabButtons = document.querySelectorAll(".tab-button");
   const panels = document.querySelectorAll(".panel");
 
@@ -11,6 +12,7 @@
     });
   });
 
+  // ---------- Slideshow ----------
   const container = document.getElementById("slideshow-container");
   const images = (typeof galleryImages !== "undefined" ? galleryImages : []).slice();
 
@@ -77,45 +79,147 @@
     current = (index + images.length) % images.length;
     slides[current].classList.add("active");
     if (dots[current]) dots[current].classList.add("active");
+    renderComments();
   }
 
-  function next() {
-    goTo(current + 1);
-  }
+  function next() { goTo(current + 1); }
+  function prev() { goTo(current - 1); }
 
-  function prev() {
-    goTo(current - 1);
+  function writingComment() {
+    const form = document.getElementById("comment-form");
+    return form && (form.contains(document.activeElement) || form.elements.message.value.trim() !== "");
   }
 
   function startAutoplay() {
-    if (images.length > 1) {
-      timer = setInterval(next, INTERVAL);
-    }
+    if (images.length > 1 && !timer && !writingComment()) timer = setInterval(next, INTERVAL);
   }
-
   function stopAutoplay() {
-    if (timer) {
-      clearInterval(timer);
-      timer = null;
-    }
+    if (timer) { clearInterval(timer); timer = null; }
   }
-
-  function restartAutoplay() {
-    stopAutoplay();
-    startAutoplay();
-  }
+  function restartAutoplay() { stopAutoplay(); startAutoplay(); }
 
   const prevBtnEl = slideshow.querySelector(".prev");
   const nextBtnEl = slideshow.querySelector(".next");
   if (prevBtnEl) prevBtnEl.addEventListener("click", () => { prev(); restartAutoplay(); });
   if (nextBtnEl) nextBtnEl.addEventListener("click", () => { next(); restartAutoplay(); });
-
-  dots.forEach((dot, i) => {
-    dot.addEventListener("click", () => { goTo(i); restartAutoplay(); });
-  });
+  dots.forEach((dot, i) => dot.addEventListener("click", () => { goTo(i); restartAutoplay(); }));
 
   slideshow.addEventListener("mouseenter", stopAutoplay);
   slideshow.addEventListener("mouseleave", startAutoplay);
-
   startAutoplay();
+
+  // ---------- Comments (per photo, stored via /api/comments) ----------
+  const commentsEl = document.getElementById("comments");
+  const listEl = document.getElementById("comments-list");
+  const statusEl = document.getElementById("comments-status");
+  const formEl = document.getElementById("comment-form");
+  const nameEl = document.getElementById("comment-name");
+  const messageEl = document.getElementById("comment-message");
+  const submitEl = formEl.querySelector(".comment-submit");
+
+  let allComments = [];
+  let commentsAvailable = false;
+
+  function setStatus(text, kind) {
+    statusEl.textContent = text || "";
+    statusEl.className = "comments-status" + (kind ? " " + kind : "");
+    statusEl.hidden = !text;
+  }
+
+  function formatDate(iso) {
+    const d = new Date(iso);
+    if (isNaN(d)) return "";
+    return d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+  }
+
+  function renderComments() {
+    if (!commentsAvailable) return;
+    const photo = images[current];
+    const mine = allComments.filter((c) => c.photo === photo);
+    listEl.innerHTML = "";
+    if (mine.length === 0) {
+      const li = document.createElement("li");
+      li.className = "comment-empty";
+      li.textContent = "No memories shared for this photo yet — be the first.";
+      listEl.appendChild(li);
+      return;
+    }
+    mine.forEach((c) => {
+      const li = document.createElement("li");
+      li.className = "comment";
+      const head = document.createElement("div");
+      head.className = "comment-head";
+      const who = document.createElement("span");
+      who.className = "comment-name";
+      who.textContent = c.name;
+      const when = document.createElement("span");
+      when.className = "comment-date";
+      when.textContent = formatDate(c.date);
+      head.appendChild(who);
+      head.appendChild(when);
+      const body = document.createElement("p");
+      body.className = "comment-message";
+      body.textContent = c.message;
+      li.appendChild(head);
+      li.appendChild(body);
+      listEl.appendChild(li);
+    });
+  }
+
+  async function loadComments() {
+    try {
+      const res = await fetch("/api/comments", { cache: "no-store" });
+      if (!res.ok) throw new Error("status " + res.status);
+      const data = await res.json();
+      allComments = Array.isArray(data.comments) ? data.comments : [];
+      commentsAvailable = true;
+      commentsEl.hidden = false;
+      renderComments();
+    } catch (err) {
+      // No API here (opened as a local file, or not deployed yet) — keep the gallery clean.
+      commentsAvailable = false;
+      commentsEl.hidden = true;
+    }
+  }
+
+  formEl.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const payload = {
+      photo: images[current],
+      name: nameEl.value.trim(),
+      message: messageEl.value.trim(),
+      website: formEl.elements.website.value,
+    };
+    if (!payload.name || !payload.message) {
+      setStatus("Please add your name and a message.", "error");
+      return;
+    }
+    submitEl.disabled = true;
+    setStatus("Posting…");
+    stopAutoplay();
+    try {
+      const res = await fetch("/api/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not post your memory.");
+      if (data.comment) allComments.push(data.comment);
+      messageEl.value = "";
+      setStatus("Thank you — your memory has been shared.", "success");
+      renderComments();
+    } catch (err) {
+      setStatus(err.message || "Could not post your memory.", "error");
+    } finally {
+      submitEl.disabled = false;
+    }
+  });
+
+  // Pause the slideshow while someone is writing so the photo doesn't change under them.
+  [nameEl, messageEl].forEach((el) => {
+    el.addEventListener("focus", stopAutoplay);
+  });
+
+  loadComments();
 })();

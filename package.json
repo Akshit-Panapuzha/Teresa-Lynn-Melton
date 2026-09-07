@@ -1,0 +1,9 @@
+{
+  "name": "teresa-lynn-melton-memorial",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "gallery": "node scripts/build-gallery.js",
+    "test": "node scripts/test-comments-api.js"
+  }
+}

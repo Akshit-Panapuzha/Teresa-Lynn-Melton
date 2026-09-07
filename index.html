@@ -41,6 +41,27 @@
   <section id="gallery" class="panel">
     <h2 class="gallery-heading">A Life in Pictures</h2>
     <div id="slideshow-container"></div>
+
+    <div id="comments" class="comments" hidden>
+      <h3 class="comments-heading">Memories of this photo</h3>
+      <ul id="comments-list" class="comments-list"></ul>
+      <p id="comments-status" class="comments-status" hidden></p>
+      <form id="comment-form" class="comment-form" autocomplete="off">
+        <div class="comment-form-row">
+          <label for="comment-name">Your name</label>
+          <input id="comment-name" name="name" type="text" maxlength="60" required />
+        </div>
+        <div class="comment-form-row">
+          <label for="comment-message">Share a memory</label>
+          <textarea id="comment-message" name="message" rows="3" maxlength="1000" required></textarea>
+        </div>
+        <div class="comment-form-trap" aria-hidden="true">
+          <label for="comment-website">Website</label>
+          <input id="comment-website" name="website" type="text" tabindex="-1" />
+        </div>
+        <button type="submit" class="comment-submit">Post memory</button>
+      </form>
+    </div>
   </section>
 </main>
 

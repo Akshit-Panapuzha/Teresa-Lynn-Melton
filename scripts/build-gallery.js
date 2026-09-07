@@ -2,9 +2,11 @@
 // Scans the images/ folder and regenerates images/manifest.js so the
 // gallery picks up new photos. Run this after adding or removing photos:
 //   node scripts/build-gallery.js
-const fs = require("fs");
-const path = require("path");
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const imagesDir = path.join(__dirname, "..", "images");
 const manifestPath = path.join(imagesDir, "manifest.js");
 const validExt = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
