@@ -86,8 +86,8 @@
   function prev() { goTo(current - 1); }
 
   function writingComment() {
-    const form = document.getElementById("comment-form");
-    return form && !form.hidden;
+    const body = document.getElementById("comments-body");
+    return body && !body.hidden;
   }
 
   function startAutoplay() {
@@ -117,22 +117,20 @@
   const messageEl = document.getElementById("comment-message");
   const submitEl = formEl.querySelector(".comment-submit");
   const toggleEl = document.getElementById("comment-toggle");
+  const bodyEl = document.getElementById("comments-body");
+  const countEl = document.getElementById("comment-count");
 
-  function setFormOpen(open) {
-    formEl.hidden = !open;
+  function setOpen(open) {
+    bodyEl.hidden = !open;
     toggleEl.setAttribute("aria-expanded", String(open));
     toggleEl.classList.toggle("open", open);
-    if (open) {
-      stopAutoplay();
-      nameEl.focus();
-    } else {
-      startAutoplay();
-    }
+    if (open) stopAutoplay();
+    else startAutoplay();
   }
 
   toggleEl.addEventListener("click", () => {
     setStatus("");
-    setFormOpen(formEl.hidden);
+    setOpen(bodyEl.hidden);
   });
 
   let allComments = [];
@@ -154,11 +152,13 @@
     if (!commentsAvailable) return;
     const photo = images[current];
     const mine = allComments.filter((c) => c.photo === photo);
+    countEl.textContent = String(mine.length);
+    countEl.hidden = mine.length === 0;
     listEl.innerHTML = "";
     if (mine.length === 0) {
       const li = document.createElement("li");
       li.className = "comment-empty";
-      li.textContent = "If this photo brings back a memory, we'd love to hear it.";
+      li.textContent = "If this photo brings back a memory, we would love for you to share it.";
       listEl.appendChild(li);
       return;
     }
@@ -206,7 +206,7 @@
   // Pick up memories other visitors post while this page is open.
   const REFRESH_MS = 90 * 1000;
   setInterval(() => {
-    if (commentsAvailable && formEl.hidden) loadComments(false);
+    if (commentsAvailable && bodyEl.hidden) loadComments(false);
   }, REFRESH_MS);
 
   formEl.addEventListener("submit", async (event) => {
@@ -235,7 +235,6 @@
       if (data.comment) allComments.push(data.comment);
       messageEl.value = "";
       renderComments();
-      setFormOpen(false);
       setStatus("Thank you — your memory has been shared.", "success");
     } catch (err) {
       setStatus(err.message || "Could not post your memory.", "error");
