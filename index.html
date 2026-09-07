@@ -102,5 +102,12 @@
 
 <script src="images/manifest.js"></script>
 <script src="script.js?v=6"></script>
+
+<!-- Vercel Web Analytics (cookieless page-view counts). Serves 404 outside
+     Vercel, which is harmless — the page works the same locally. -->
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
