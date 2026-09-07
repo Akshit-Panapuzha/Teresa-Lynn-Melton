@@ -2,8 +2,13 @@
 // No network, no token needed:  node scripts/test-comments-api.js
 import assert from "node:assert/strict";
 
-process.env.GITHUB_TOKEN = "test-token";
-process.env.GITHUB_REPO = "example/repo";
+// Deliberately padded with the kind of stray whitespace a dashboard paste
+// introduces — a tab in GITHUB_BRANCH once broke production. The assertions
+// below check these are trimmed before they reach GitHub.
+process.env.GITHUB_TOKEN = " test-token\n";
+process.env.GITHUB_REPO = "  example/repo  ";
+process.env.GITHUB_BRANCH = "\tmain";
+process.env.COMMENTS_PATH = " comments.json ";
 
 const { default: handler } = await import("../api/comments.js");
 
@@ -24,6 +29,7 @@ globalThis.fetch = async (url, options = {}) => {
   }
   if (method === "PUT") {
     const body = JSON.parse(options.body);
+    assert.equal(body.branch, "main", "branch must be trimmed before it reaches GitHub");
     if (failNextWrite || body.sha !== store.sha) {
       failNextWrite = false;
       return new Response("conflict", { status: 409 });

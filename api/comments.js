@@ -8,9 +8,17 @@
 //   GITHUB_BRANCH   defaults to main
 //   COMMENTS_PATH   defaults to comments.json
 
-const REPO = process.env.GITHUB_REPO || "Akshit-Panapuzha/Teresa-Lynn-Melton";
-const BRANCH = process.env.GITHUB_BRANCH || "main";
-const FILE_PATH = process.env.COMMENTS_PATH || "comments.json";
+// Values pasted into a dashboard commonly pick up stray whitespace (a tab in
+// GITHUB_BRANCH once sent us looking for a branch named "\tmain"), so trim
+// every one and fall back to the default when what's left is empty.
+function env(name, fallback) {
+  const value = (process.env[name] || "").trim();
+  return value || fallback;
+}
+
+const REPO = env("GITHUB_REPO", "Akshit-Panapuzha/Teresa-Lynn-Melton");
+const BRANCH = env("GITHUB_BRANCH", "main");
+const FILE_PATH = env("COMMENTS_PATH", "comments.json");
 const API_URL = `https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`;
 
 const MAX_NAME = 60;
@@ -25,7 +33,7 @@ const recentPosts = new Map();
 
 function githubHeaders() {
   return {
-    Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+    Authorization: `Bearer ${env("GITHUB_TOKEN", "")}`,
     Accept: "application/vnd.github+json",
     "User-Agent": "teresa-memorial-comments",
     "X-GitHub-Api-Version": "2022-11-28",
@@ -100,7 +108,7 @@ function parseBody(req) {
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
-  if (!process.env.GITHUB_TOKEN) {
+  if (!env("GITHUB_TOKEN", "")) {
     return res.status(503).json({ error: "Comments are not configured yet (missing GITHUB_TOKEN)." });
   }
 
